@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  claude-webhook-listener:
+    build: .
+    container_name: claude-webhook-listener
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      # ===== 必须配置 =====
+      GITLAB_URL: ${GITLAB_URL:-https://gitlab.com}
+      GITLAB_TRIGGER_TOKEN: ${GITLAB_TRIGGER_TOKEN}
+      # ===== 多仓库（可选）=====
+      PROJECT_TRIGGER_TOKENS: ${PROJECT_TRIGGER_TOKENS:-}
+      # ===== 推荐配置 =====
+      GITLAB_ACCESS_TOKEN: ${GITLAB_ACCESS_TOKEN:-}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:-}
+      # ===== 可选配置 =====
+      DEFAULT_REF: ${DEFAULT_REF:-main}
+      PORT: "8080"
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
